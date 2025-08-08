@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ULTTA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #1a202c; /* Tailwind's gray-900 */
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: 1rem;
+        }
+        .container {
+            background-color: #2d3748; /* Tailwind's gray-800 */
+            border-radius: 1.5rem;
+            box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+            padding: 2rem;
+            width: 100%;
+            max-width: 3xl;
+            text-align: center;
+        }
+        #tiles {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+        #tiles button {
+            height: 6rem;
+            width: 100%;
+            border-radius: 0.75rem;
+            transition: transform 0.2s;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        #tiles button:hover {
+            transform: scale(1.05);
+            border: 2px solid white;
+        }
+        #colorWord {
+            font-size: 3rem;
+            font-weight: 800;
+            line-height: 1;
+            transition: color 0.5s;
+        }
+        .timer-display {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #4299e1; /* Tailwind's blue-500 */
+        }
+        #result-display {
+            margin-top: 1.5rem;
+            font-size: 1.25rem;
+            font-weight: 600;
+            min-height: 2rem;
+        }
+        #message-box {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            padding: 1rem 2rem;
+            background-color: #e53e3e;
+            color: white;
+            border-radius: 1rem;
+            font-weight: bold;
+            z-index: 10;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+            pointer-events: none;
+        }
+        #video-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            background-color: rgba(0, 0, 0, 0.9);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            opacity: 0;
+            transition: opacity 0.5s;
+            pointer-events: none;
+        }
+        #video-overlay.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .video-container {
+            width: 80%;
+            max-width: 640px;
+            aspect-ratio: 16/9;
+            border-radius: 1rem;
+            overflow: hidden;
+        }
+        /* Style for the YouTube player div */
+        #video-player {
+            width: 100%;
+            height: 100%;
+        }
+        #start-button {
+            padding: 0.75rem 2rem;
+            background-color: #4299e1;
+            color: white;
+            font-weight: bold;
+            border-radius: 0.75rem;
+            transition: transform 0.2s;
+        }
+        #start-button:hover {
+            transform: scale(1.05);
+        }
+    </style>
+    <script src="https://cdn.jsdelivr.net/npm/tone@14.7.58/build/Tone.js"></script>
+    <script src="https://www.youtube.com/iframe_api"></script>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-4xl font-extrabold text-red-400 mb-2">"PHILIPPINTE PANI!"</h1>
+        <p class="text-gray-400 mb-6">Click the tile that matches the **text color** of the word.</p>
+
+        <div class="flex justify-around items-center mb-6">
+            <div>
+                <p class="text-sm text-gray-400">Total Time</p>
+                <p id="timer" class="timer-display">60</p>
+            </div>
+            <div>
+                <p class="text-sm text-gray-400">Question</p>
+                <p id="questionNumber" class="timer-display">1</p>
+            </div>
+        </div>
+
+        <div id="game-area" class="hidden">
+            <div id="colorWord" class="mb-4"></div>
+            <div id="tiles"></div>
+            <div id="result-display" class="text-gray-200"></div>
+        </div>
+
+        <button id="start-button">Start Game</button>
+
+    </div>
+
+    <div id="message-box">WRONG!</div>
+    
+    <div id="video-overlay">
+        <div class="video-container">
+            <div id="video-player"></div>
+        </div>
+    </div>
+
+    <script>
+        // Game Assets (no local files needed)
+        const colors = ["red", "blue", "green", "orange", "purple", "yellow", "pink", "brown", "gray"];
+
+        // Your YouTube Shorts video IDs have been added here!
+        const videoIds = [
+            "lzvZOZiDE3U",
+            "Tfv4tzduLsE",
+            "ZIS8c9obR4s",
+            "QQTQBQOo464",
+            "IHG4PkvLxwM"
+        ];
+        
+        // Game State
+        let totalTime = 60;
+        let questionTime = 3; // Reduced to 3 seconds
+        let totalQuestions = 20; // Increased to 20 questions
+        let currentQuestion = 0;
+        let correctAnswers = 0;
+        let correctColor = "";
+        let totalTimer = null;
+        let questionTimer = null;
+        let nextVideoInterval = 5; // Fixed interval
+        let isVideoPlaying = false; // Flag to track video state
+        let player = null; // Initialize player as null
+
+        // DOM Elements
+        const startButton = document.getElementById("start-button");
+        const gameArea = document.getElementById("game-area");
+        const timerDisplay = document.getElementById("timer");
+        const questionNumberDisplay = document.getElementById("questionNumber");
+        const colorWord = document.getElementById("colorWord");
+        const tilesContainer = document.getElementById("tiles");
+        const resultDisplay = document.getElementById("result-display");
+        const messageBox = document.getElementById("message-box");
+        const videoOverlay = document.getElementById("video-overlay");
+
+        // Sound Generators using Tone.js
+        const wrongSynth = new Tone.Synth().toDestination();
+        const rewardSynth = new Tone.Synth({
+            oscillator: { type: "sine" },
+            envelope: {
+                attack: 0.05,
+                decay: 0.1,
+                sustain: 0.5,
+                release: 1
+            }
+        }).toDestination();
+        
+        // Event Listeners
+        startButton.addEventListener('click', startGame);
+
+        // This function is automatically called when the API script is loaded
+        function onYouTubeIframeAPIReady() {
+            player = new YT.Player('video-player', {
+                height: '360',
+                width: '640',
+                videoId: videoIds[0], // Load the first video on standby
+                playerVars: {
+                    'playsinline': 1,
+                    'autoplay': 1,
+                    'mute': 0, // Unmute the video
+                    'controls': 0, // Hides video controls
+                    'disablekb': 1, // Disables keyboard controls
+                },
+                events: {
+                    'onStateChange': onPlayerStateChange
+                }
+            });
+        }
+
+        function onPlayerStateChange(event) {
+            // Check if the video has ended
+            if (event.data === YT.PlayerState.ENDED) {
+                videoOverlay.classList.remove('active');
+                isVideoPlaying = false;
+            }
+        }
+
+        // Main Game Functions
+        function startGame() {
+            startButton.classList.add('hidden');
+            gameArea.classList.remove('hidden');
+            
+            // Reset game state
+            totalTime = 60;
+            currentQuestion = 0;
+            correctAnswers = 0;
+            resultDisplay.innerText = "";
+            timerDisplay.innerText = totalTime;
+            questionNumberDisplay.innerText = 1;
+
+            startTimers();
+            nextQuestion();
+        }
+
+        function startTimers() {
+            // Total game timer
+            totalTimer = setInterval(() => {
+                if (isVideoPlaying) return; // Do not run if a video is playing
+                totalTime--;
+                timerDisplay.innerText = totalTime;
+
+                // Useless video interruption logic, now fixed at 5 seconds
+                if (totalTime > 0 && totalTime % nextVideoInterval === 0 && totalTime > 5) {
+                    showVideoOverlay();
+                }
+
+                if (totalTime <= 0) {
+                    endGame();
+                }
+            }, 1000);
+
+            // Per-question timer
+            questionTimer = setInterval(() => {
+                if (isVideoPlaying) return; // Do not run if a video is playing
+                questionTime--;
+                if (questionTime <= 0) {
+                    // Auto-skip, play wrong sound but don't count it as wrong answer
+                    wrongSynth.triggerAttackRelease("C4", "8n");
+                    nextQuestion();
+                }
+            }, 1000);
+        }
+
+        function nextQuestion() {
+            // Reset question time
+            questionTime = 3;
+
+            if (currentQuestion >= totalQuestions) { // Check against new total
+                endGame();
+                return;
+            }
+            
+            currentQuestion++;
+            questionNumberDisplay.innerText = currentQuestion;
+
+            const textColor = getRandomColor();
+            correctColor = textColor;
+
+            const word = getRandomColor();
+            colorWord.innerText = word;
+            colorWord.style.color = textColor;
+
+            generateTiles();
+        }
+
+        function generateTiles() {
+            tilesContainer.innerHTML = "";
+
+            const options = [...colors];
+            shuffleArray(options);
+
+            for (let i = 0; i < 9; i++) {
+                const btn = document.createElement("button");
+                btn.style.backgroundColor = options[i];
+                btn.onclick = () => handleClick(options[i]);
+                tilesContainer.appendChild(btn);
+            }
+        }
+
+        function handleClick(selectedColor) {
+            if (selectedColor === correctColor) {
+                correctAnswers++;
+            } else {
+                wrongSynth.triggerAttackRelease("C4", "8n");
+                showMessageBox("WRONG!");
+            }
+            nextQuestion();
+        }
+
+        function endGame() {
+            clearInterval(totalTimer);
+            clearInterval(questionTimer);
+            tilesContainer.innerHTML = "";
+            colorWord.innerText = "Game Over";
+
+            if (correctAnswers === totalQuestions) { // Check against new total
+                rewardSynth.triggerAttackRelease("C5", "4n");
+                resultDisplay.innerHTML = `🎉 Perfect! You got all ${totalQuestions} correct!<br>🏆 Reward: A free invisible hat nobody can see or use!`;
+            } else {
+                resultDisplay.innerText = `Game Over. You got ${correctAnswers} out of ${totalQuestions} correct. Try again if you dare.`;
+            }
+
+            startButton.innerText = "Play Again";
+            startButton.classList.remove('hidden');
+        }
+
+        function getRandomColor() {
+            return colors[Math.floor(Math.random() * colors.length)];
+        }
+
+        function shuffleArray(arr) {
+            for (let i = arr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [arr[i], arr[j]] = [arr[j], arr[i]];
+            }
+        }
+        
+        // Custom message box to replace alert()
+        function showMessageBox(message) {
+            messageBox.textContent = message;
+            messageBox.style.opacity = 1;
+            setTimeout(() => {
+                messageBox.style.opacity = 0;
+            }, 1000);
+        }
+        
+        // Video overlay function
+        function showVideoOverlay() {
+            if (!player || isVideoPlaying) return;
+            
+            isVideoPlaying = true;
+            // Pick a random video ID
+            const randomVideoId = videoIds[Math.floor(Math.random() * videoIds.length)];
+
+            // Load and play the video using the API
+            player.loadVideoById(randomVideoId);
+            player.unMute(); // Unmute the video
+            videoOverlay.classList.add('active');
+        }
+    </script>
+</body>
+</html>
