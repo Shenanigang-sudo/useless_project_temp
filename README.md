@@ -1,34 +1,34 @@
 <img width="3188" height="1202" alt="frame (3)" src="https://github.com/user-attachments/assets/517ad8e9-ad22-457d-9538-a9e62d137cd7" />
 
 
-# [Project Name] 🎯
+# PHILIPPINTE PANI! 🎯
 
 
 ## Basic Details
-### Team Name: [Name]
+### Team Name: SHENANIGANG
 
 
 ### Team Members
-- Team Lead: [Name] - [College]
-- Member 2: [Name] - [College]
+- Team Lead: ADISH PRAMOD - SCMS SCHOOL OF ENGINEERING AND TECHNOLOGY
+- Member 2: SREEJITH RAJ - SCMS SCHOOL OF ENGGINEERING AND TECHNOLOGY
 - Member 3: [Name] - [College]
 
 ### Project Description
-[2-3 lines about what your project does]
+A chaotic test of your reflexes and your patience! Match the colours of the tiles to the word on your screen while the timer runs. To add more chaos a random brainrot is dropped at every 5 seconds. Can you survive the the mayhem without losing your cool?
 
 ### The Problem (that doesn't exist)
-[What ridiculous problem are you solving?]
+Tackles the most overlooked crisis of people having too much peace and mental stability!
 
 ### The Solution (that nobody asked for)
-[How are you solving it? Keep it fun!]
+A perfectly balanced mixture of chaos and trolling. Philippinte Pani keeps you on your toes with rapid fire colour challenges and sabotages your focus with unskippable and unseekable brainrot videos. Tests your reflexes, patience and not throwing your laptop across the room.
 
 ## Technical Details
 ### Technologies/Components Used
 For Software:
-- [Languages used]
-- [Frameworks used]
-- [Libraries used]
-- [Tools used]
+- HTML, JAVASCRIPT, CSS
+- 
+- 
+- VISUAL STUDIO CODE
 
 For Hardware:
 - [List main components]
@@ -36,7 +36,7 @@ For Hardware:
 - [List tools required]
 
 ### Implementation
-For Software:
+For Software:HTML Web Page
 # Installation
 [commands]
 
@@ -47,14 +47,18 @@ For Software:
 For Software:
 
 # Screenshots (Add at least 3)
-![Screenshot1](Add screenshot 1 here with proper name)
-*Add caption explaining what this shows*
+![Screenshot1]
+<img width="1920" height="1080" alt="Image" src="https://github.com/user-attachments/assets/9bc16528-c959-4ce6-9a9d-7e3303004468" />
+Opening interface of the Game.
 
-![Screenshot2](Add screenshot 2 here with proper name)
-*Add caption explaining what this shows*
+![Screenshot2]
 
-![Screenshot3](Add screenshot 3 here with proper name)
-*Add caption explaining what this shows*
+<img width="1920" height="1080" alt="Image" src="https://github.com/user-attachments/assets/48abcbb0-bbba-4133-8975-c573ffe499ee" />
+Actual game example
+
+![Screenshot3]
+<img width="1920" height="1080" alt="Image" src="https://github.com/user-attachments/assets/db6639a8-73d1-4248-a57e-e7f11bc95ccb" />
+Random Brainrot video that pops up.
 
 # Diagrams
 ![Workflow](Add your workflow/architecture diagram here)
@@ -88,9 +92,10 @@ For Hardware:
 [Add any extra demo materials/links]
 
 ## Team Contributions
-- [Name 1]: [Specific contributions]
-- [Name 2]: [Specific contributions]
-- [Name 3]: [Specific contributions]
+- IDEA: Brainstormed and conceptualized the core idea and gameplay.
+- BUILD: Developed the game logic, colour matching triggers and interrupters using HTML, JavaScript, and CSS 
+- DESIGN: Created engaging user interface using CSS
+- TEST: Conducted the play testing to refine difficulty, balancce chaos and ensure peak irritation levels.
 
 ---
 Made with ❤️ at TinkerHub Useless Projects 
